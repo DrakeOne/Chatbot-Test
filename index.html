@@ -5,219 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lindy AI Chat</title>
     <style>
-        /* CSS: Estilos Generales y Variables de Tema */
-        :root {
-            --bg-color-light: #f0f2f5;
-            --chat-bg-light: #ffffff;
-            --text-color-light: #050505;
-            --input-bg-light: #f0f2f5;
-            --user-bubble-light: #0084ff;
-            --bot-bubble-light: #e4e6eb;
-            --text-user-light: #ffffff;
-            --text-bot-light: #050505;
-            --header-bg-light: #ffffff;
-            --border-color-light: #ced0d4;
-            --debug-bg-light: #fafafa;
-
-            --bg-color-dark: #121212;
-            --chat-bg-dark: #1e1e1e;
-            --text-color-dark: #e4e6eb;
-            --input-bg-dark: #3a3b3c;
-            --user-bubble-dark: #0084ff;
-            --bot-bubble-dark: #3a3b3c;
-            --text-user-dark: #ffffff;
-            --text-bot-dark: #e4e6eb;
-            --header-bg-dark: #242526;
-            --border-color-dark: #3a3b3c;
-            --debug-bg-dark: #2d2d2d;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: var(--bg-color-light);
-            transition: background-color 0.3s ease;
-        }
-
-        body.dark-theme { background: var(--bg-color-dark); }
-
-        /* Contenedor Principal del Chat */
-        #chat-container {
-            width: 100%;
-            height: 100%;
-            max-width: 800px;
-            max-height: 95vh;
-            display: flex;
-            flex-direction: column;
-            background: var(--chat-bg-light);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: background-color 0.3s ease;
-            position: relative;
-            z-index: 10;
-        }
-
-        body.dark-theme #chat-container { background: var(--chat-bg-dark); }
-
-        /* Encabezado del Chat */
-        .chat-header {
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--header-bg-light);
-            border-bottom: 1px solid var(--border-color-light);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        body.dark-theme .chat-header {
-            background: var(--header-bg-dark);
-            border-bottom: 1px solid var(--border-color-dark);
-        }
-
-        .chat-header h1 {
-            color: var(--text-color-light);
-            font-size: 1.2rem;
-            margin: 0;
-            transition: color 0.3s ease;
-        }
-
-        body.dark-theme .chat-header h1 { color: var(--text-color-dark); }
-
-        .header-buttons { display: flex; gap: 10px; }
-        .header-btn {
-            background: none; border: none; cursor: pointer;
-            font-size: 1.2rem; color: #8a8d91; transition: color 0.2s ease;
-        }
-        .header-btn:hover { color: var(--user-bubble-light); }
-
-        /* Área de Mensajes */
-        #message-container {
-            flex-grow: 1; padding: 20px; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 15px;
-        }
-
-        .message {
-            display: flex; flex-direction: column;
-            max-width: 75%; animation: fadeIn 0.5s ease-out;
-        }
-        .message .bubble {
-            padding: 10px 15px; border-radius: 18px;
-            line-height: 1.5; word-wrap: break-word;
-        }
-        .message .timestamp {
-            font-size: 0.75rem; color: #8a8d91;
-            margin-top: 5px; padding: 0 5px;
-        }
-
-        .user-message { align-self: flex-end; }
-        .user-message .bubble {
-            background: var(--user-bubble-light); color: var(--text-user-light);
-            border-bottom-right-radius: 4px;
-        }
-        .user-message .timestamp { text-align: right; }
-
-        .bot-message { align-self: flex-start; }
-        .bot-message .bubble {
-            background: var(--bot-bubble-light); color: var(--text-bot-light);
-            border-bottom-left-radius: 4px;
-        }
-        body.dark-theme .bot-message .bubble {
-            background: var(--bot-bubble-dark); color: var(--text-bot-dark);
-        }
-        .bot-message .timestamp { text-align: left; }
-
-        /* Indicador de "Escribiendo..." */
-        .typing-indicator .dot {
-            width: 8px; height: 8px; background-color: #b0b3b8;
-            border-radius: 50%; animation: typing 1.4s infinite;
-        }
-        .typing-indicator { display: flex; align-items: center; gap: 5px; }
-        .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
-
-        /* Área de Entrada */
-        .chat-input-area { padding: 15px 20px; border-top: 1px solid var(--border-color-light); }
-        body.dark-theme .chat-input-area { border-top: 1px solid var(--border-color-dark); }
-        #chat-form { display: flex; gap: 10px; }
-        #user-input {
-            flex-grow: 1; border: none; background: var(--input-bg-light);
-            border-radius: 18px; padding: 12px 18px; font-size: 1rem;
-            color: var(--text-color-light); transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        #user-input:focus { outline: none; }
-        body.dark-theme #user-input { background: var(--input-bg-dark); color: var(--text-color-dark); }
-        #send-btn {
-            background: var(--user-bubble-light); border: none; border-radius: 50%;
-            width: 44px; height: 44px; display: flex; justify-content: center;
-            align-items: center; cursor: pointer; transition: transform 0.2s ease;
-        }
-        #send-btn:hover { transform: scale(1.1); }
-        #send-btn svg { fill: white; }
-        
-        /* Panel de Depuración */
-        #debug-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 350px;
-            max-height: 50vh;
-            background: var(--debug-bg-light);
-            color: var(--text-color-light);
-            border: 1px solid var(--border-color-light);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-        }
-        body.dark-theme #debug-panel {
-            background: var(--debug-bg-dark);
-            color: var(--text-color-dark);
-            border-color: var(--border-color-dark);
-        }
-        #debug-panel.hidden { transform: translateY(20px); opacity: 0; pointer-events: none; }
-        .debug-header {
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color-light);
-            cursor: move;
-        }
-        body.dark-theme .debug-header { border-color: var(--border-color-dark); }
-        .debug-header h3 { margin: 0; font-size: 0.9rem; }
-        #debug-content { padding: 10px; overflow-y: auto; font-size: 0.8rem; }
-        #debug-content pre { margin: 5px 0; white-space: pre-wrap; word-wrap: break-word; }
-
-        /* Animaciones y Media Queries */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
-        @media (max-width: 768px) { #chat-container { max-height: 100vh; border-radius: 0; } }
+        /* Estilos CSS completos para la interfaz */
+        :root{--bg-color-light:#f0f2f5;--chat-bg-light:#fff;--text-color-light:#050505;--input-bg-light:#f0f2f5;--user-bubble-light:#0084ff;--bot-bubble-light:#e4e6eb;--text-user-light:#fff;--text-bot-light:#050505;--header-bg-light:#fff;--border-color-light:#ced0d4;--debug-bg-light:#fafafa;--bg-color-dark:#121212;--chat-bg-dark:#1e1e1e;--text-color-dark:#e4e6eb;--input-bg-dark:#3a3b3c;--user-bubble-dark:#0084ff;--bot-bubble-dark:#3a3b3c;--text-user-dark:#fff;--text-bot-dark:#e4e6eb;--header-bg-dark:#242526;--border-color-dark:#3a3b3c;--debug-bg-dark:#2d2d2d}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:var(--bg-color-light);transition:background-color .3s ease}body.dark-theme{background:var(--bg-color-dark)}#chat-container{width:100%;height:100%;max-width:800px;max-height:95vh;display:flex;flex-direction:column;background:var(--chat-bg-light);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);overflow:hidden;transition:background-color .3s ease;position:relative;z-index:10}body.dark-theme #chat-container{background:var(--chat-bg-dark)}.chat-header{padding:10px 20px;display:flex;justify-content:space-between;align-items:center;background:var(--header-bg-light);border-bottom:1px solid var(--border-color-light);transition:background-color .3s ease,border-color .3s ease}body.dark-theme .chat-header{background:var(--header-bg-dark);border-bottom:1px solid var(--border-color-dark)}.chat-header h1{color:var(--text-color-light);font-size:1.2rem;margin:0;transition:color .3s ease}body.dark-theme .chat-header h1{color:var(--text-color-dark)}.header-buttons{display:flex;gap:10px}.header-btn{background:0 0;border:none;cursor:pointer;font-size:1.2rem;color:#8a8d91;transition:color .2s ease}.header-btn:hover{color:var(--user-bubble-light)}#message-container{flex-grow:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:15px}.message{display:flex;flex-direction:column;max-width:75%;animation:fadeIn .5s ease-out}.message .bubble{padding:10px 15px;border-radius:18px;line-height:1.5;word-wrap:break-word}.message .timestamp{font-size:.75rem;color:#8a8d91;margin-top:5px;padding:0 5px}.user-message{align-self:flex-end}.user-message .bubble{background:var(--user-bubble-light);color:var(--text-user-light);border-bottom-right-radius:4px}.user-message .timestamp{text-align:right}.bot-message{align-self:flex-start}.bot-message .bubble{background:var(--bot-bubble-light);color:var(--text-bot-light);border-bottom-left-radius:4px}body.dark-theme .bot-message .bubble{background:var(--bot-bubble-dark);color:var(--text-bot-dark)}.bot-message .timestamp{text-align:left}.typing-indicator .dot{width:8px;height:8px;background-color:#b0b3b8;border-radius:50%;animation:typing 1.4s infinite}.typing-indicator{display:flex;align-items:center;gap:5px}.typing-indicator .dot:nth-child(2){animation-delay:.2s}.typing-indicator .dot:nth-child(3){animation-delay:.4s}.chat-input-area{padding:15px 20px;border-top:1px solid var(--border-color-light)}body.dark-theme .chat-input-area{border-top:1px solid var(--border-color-dark)}#chat-form{display:flex;gap:10px}#user-input{flex-grow:1;border:none;background:var(--input-bg-light);border-radius:18px;padding:12px 18px;font-size:1rem;color:var(--text-color-light);transition:background-color .3s ease,color .3s ease}#user-input:focus{outline:0}body.dark-theme #user-input{background:var(--input-bg-dark);color:var(--text-color-dark)}#send-btn{background:var(--user-bubble-light);border:none;border-radius:50%;width:44px;height:44px;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:transform .2s ease}#send-btn:hover{transform:scale(1.1)}#send-btn svg{fill:#fff}#debug-panel{position:fixed;bottom:20px;right:20px;width:350px;max-height:50vh;background:var(--debug-bg-light);color:var(--text-color-light);border:1px solid var(--border-color-light);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:1000;display:flex;flex-direction:column;transition:all .3s ease}body.dark-theme #debug-panel{background:var(--debug-bg-dark);color:var(--text-color-dark);border-color:var(--border-color-dark)}#debug-panel.hidden{transform:translateY(20px);opacity:0;pointer-events:none}.debug-header{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color-light);cursor:move}body.dark-theme .debug-header{border-color:var(--border-color-dark)}.debug-header h3{margin:0;font-size:.9rem}#debug-content{padding:10px;overflow-y:auto;font-size:.8rem}#debug-content pre{margin:5px 0;white-space:pre-wrap;word-wrap:break-word}@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}@media (max-width:768px){#chat-container{max-height:100vh;border-radius:0}}
     </style>
 </head>
 <body>
-
     <div id="chat-container">
         <header class="chat-header">
-            <h1>Lindy AI Chat</h1>
+            <h1>Lindy AI Chat (Seguro)</h1>
             <div class="header-buttons">
                 <button id="clear-chat-btn" class="header-btn" title="Limpiar Chat">🗑️</button>
                 <button id="theme-toggle-btn" class="header-btn" title="Cambiar Tema">🌙</button>
                 <button id="debug-toggle-btn" class="header-btn" title="Depuración">🐞</button>
             </div>
         </header>
-
-        <main id="message-container">
-            <!-- Mensajes del chat aquí -->
-        </main>
-
+        <main id="message-container"></main>
         <footer class="chat-input-area">
             <form id="chat-form">
                 <input type="text" id="user-input" placeholder="Escribe tu mensaje..." autocomplete="off">
@@ -227,23 +29,15 @@
             </form>
         </footer>
     </div>
-
-    <!-- Panel de Depuración -->
     <div id="debug-panel" class="hidden">
-        <div class="debug-header">
-            <h3>Panel de Depuración</h3>
-            <button id="close-debug-btn" class="header-btn">&times;</button>
-        </div>
+        <div class="debug-header"><h3>Panel de Depuración</h3><button id="close-debug-btn" class="header-btn">&times;</button></div>
         <div id="debug-content"></div>
     </div>
-
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
-            // --- CONFIGURACIÓN CON CREDENCIALES DE PRUEBA ---
-            const LINDY_WEBHOOK_URL = 'https://public.lindy.ai/api/v1/webhooks/lindy/101d9e2e-6317-4b78-96ce-000963dfbecf';
-            const LINDY_SECRET_KEY = '46ffb493d8a1383bf869d70db54a1adf68f0e9be39f6cad8bc1bc4b431107151';
+            // --- CONFIGURACIÓN FINAL ---
+            // Esta URL apunta a tu servidor seguro en Vercel, que oculta tu clave secreta.
+            const YOUR_SERVER_URL = 'https://lindy-chatbot-backend.vercel.app/api';
 
             // --- SELECTORES DOM ---
             const chatForm = document.getElementById('chat-form');
@@ -266,17 +60,14 @@
             loadInitialState();
 
             // --- FUNCIONES PRINCIPALES ---
-
             async function handleSendMessage(event) {
                 event.preventDefault();
                 const messageText = userInput.value.trim();
                 if (!messageText) return;
-
                 addMessageToUI('user', messageText);
                 saveChatHistory();
                 userInput.value = '';
                 showTypingIndicator();
-
                 try {
                     const aiResponse = await fetchAIResponse(messageText);
                     removeTypingIndicator();
@@ -291,118 +82,38 @@
             }
             
             /**
-             * ✅ FUNCIÓN MEJORADA ✅
-             * Envía el mensaje y procesa inteligentemente la respuesta.
+             * ✅ FUNCIÓN FINAL Y SEGURA ✅
+             * Llama a nuestro servidor intermediario en Vercel.
              */
             async function fetchAIResponse(message) {
-                const response = await fetch(LINDY_WEBHOOK_URL, {
+                const requestId = Date.now().toString() + Math.random().toString(36).substring(2);
+                
+                const response = await fetch(YOUR_SERVER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${LINDY_SECRET_KEY}`
-                    },
-                    body: JSON.stringify({ message: message })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, requestId: requestId })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Error HTTP! Estado: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({ response: 'Error de red o respuesta no válida del servidor.' }));
+                    throw new Error(errorData.response || `Error del servidor: ${response.status}`);
                 }
-
-                const data = await response.json();
                 
-                // Muestra la respuesta COMPLETA en el panel de depuración
-                logToDebugPanel('Respuesta de Lindy (Raw)', JSON.stringify(data, null, 2));
+                const data = await response.json();
+                logToDebugPanel('Respuesta de Lindy (vía Servidor)', JSON.stringify(data, null, 2));
 
-                // Lógica mejorada para encontrar el texto de la respuesta
                 if (typeof data === 'string') return data;
                 if (data && data.response) return data.response;
                 if (data && data.text) return data.text;
                 if (data && data.message) return data.message;
                 if (data && data.content) return data.content;
-                if (data) return JSON.stringify(data, null, 2); // Como último recurso, muestra el JSON formateado
+                if (data) return JSON.stringify(data, null, 2);
 
                 return "No se recibió respuesta del asistente.";
             }
-            
-            // --- FUNCIONES DE LA INTERFAZ (UI) ---
 
-            function addMessageToUI(sender, text, type = 'normal') {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}-message`;
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-                bubble.textContent = text;
-                if (type === 'error') bubble.style.color = 'red';
-                const timestamp = document.createElement('div');
-                timestamp.className = 'timestamp';
-                timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                messageDiv.appendChild(bubble);
-                messageDiv.appendChild(timestamp);
-                messageContainer.appendChild(messageDiv);
-                scrollToBottom();
-            }
-
-            function showTypingIndicator() {
-                const indicatorDiv = document.createElement('div');
-                indicatorDiv.className = 'message bot-message';
-                indicatorDiv.id = 'typing-indicator';
-                indicatorDiv.innerHTML = `<div class="bubble typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
-                messageContainer.appendChild(indicatorDiv);
-                scrollToBottom();
-            }
-
-            function removeTypingIndicator() {
-                const indicator = document.getElementById('typing-indicator');
-                if (indicator) indicator.remove();
-            }
-
-            function scrollToBottom() {
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-            }
-
-            // --- MANEJO DE ESTADO Y TEMA ---
-
-            function toggleTheme() {
-                document.body.classList.toggle('dark-theme');
-                const isDark = document.body.classList.contains('dark-theme');
-                themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
-                localStorage.setItem('chat-theme', isDark ? 'dark' : 'light');
-            }
-
-            function clearChat() {
-                messageContainer.innerHTML = '';
-                localStorage.removeItem('chat-history');
-                addMessageToUI('bot', 'Hola, ¿en qué puedo ayudarte hoy?');
-            }
-
-            function saveChatHistory() {
-                localStorage.setItem('chat-history', messageContainer.innerHTML);
-            }
-
-            function loadInitialState() {
-                const savedTheme = localStorage.getItem('chat-theme');
-                if (savedTheme === 'dark') {
-                    document.body.classList.add('dark-theme');
-                    themeToggleBtn.textContent = '☀️';
-                }
-                const savedHistory = localStorage.getItem('chat-history');
-                if (savedHistory) {
-                    messageContainer.innerHTML = savedHistory;
-                    scrollToBottom();
-                } else {
-                    addMessageToUI('bot', 'Hola, ¿en qué puedo ayudarte hoy?');
-                }
-            }
-            
-            /**
-             * Nueva función para mostrar logs en el panel de depuración.
-             */
-            function logToDebugPanel(title, content) {
-                const entry = document.createElement('div');
-                entry.innerHTML = `<strong>${title}:</strong><pre>${content}</pre>`;
-                debugContent.appendChild(entry);
-                debugContent.scrollTop = debugContent.scrollHeight; // Auto-scroll
-            }
+            // El resto de las funciones (UI, estado, etc.) no cambian
+            function addMessageToUI(sender,text,type='normal'){const e=document.createElement("div");e.className=`message ${sender}-message`;const t=document.createElement("div");t.className="bubble",t.textContent=text,"error"===type&&(t.style.color="red");const n=document.createElement("div");n.className="timestamp",n.textContent=(new Date).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),e.appendChild(t),e.appendChild(n),messageContainer.appendChild(e),scrollToBottom()}function showTypingIndicator(){const e=document.createElement("div");e.className="message bot-message",e.id="typing-indicator",e.innerHTML='<div class="bubble typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>',messageContainer.appendChild(e),scrollToBottom()}function removeTypingIndicator(){const e=document.getElementById("typing-indicator");e&&e.remove()}function scrollToBottom(){messageContainer.scrollTop=messageContainer.scrollHeight}function toggleTheme(){document.body.classList.toggle("dark-theme");const e=document.body.classList.contains("dark-theme");themeToggleBtn.textContent=e?"☀️":"🌙",localStorage.setItem("chat-theme",e?"dark":"light")}function clearChat(){messageContainer.innerHTML="",localStorage.removeItem("chat-history"),addMessageToUI("bot","Hola, ¿en qué puedo ayudarte hoy?")}function saveChatHistory(){localStorage.setItem("chat-history",messageContainer.innerHTML)}function loadInitialState(){const e=localStorage.getItem("chat-theme");"dark"===e&&(document.body.classList.add("dark-theme"),themeToggleBtn.textContent="☀️");const t=localStorage.getItem("chat-history");t?(messageContainer.innerHTML=t,scrollToBottom()):addMessageToUI("bot","Hola, ¿en qué puedo ayudarte hoy?")}function logToDebugPanel(e,t){const n=document.createElement("div");n.innerHTML=`<strong>${e}:</strong><pre>${t}</pre>`,debugContent.appendChild(n),debugContent.scrollTop=debugContent.scrollHeight}
         });
     </script>
 </body>
