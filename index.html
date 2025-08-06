@@ -17,6 +17,7 @@
             --text-bot-light: #050505;
             --header-bg-light: #ffffff;
             --border-color-light: #ced0d4;
+            --debug-bg-light: #fafafa;
 
             --bg-color-dark: #121212;
             --chat-bg-dark: #1e1e1e;
@@ -28,6 +29,7 @@
             --text-bot-dark: #e4e6eb;
             --header-bg-dark: #242526;
             --border-color-dark: #3a3b3c;
+            --debug-bg-dark: #2d2d2d;
         }
 
         body {
@@ -41,9 +43,7 @@
             transition: background-color 0.3s ease;
         }
 
-        body.dark-theme {
-            background: var(--bg-color-dark);
-        }
+        body.dark-theme { background: var(--bg-color-dark); }
 
         /* Contenedor Principal del Chat */
         #chat-container {
@@ -58,11 +58,11 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             transition: background-color 0.3s ease;
+            position: relative;
+            z-index: 10;
         }
 
-        body.dark-theme #chat-container {
-            background: var(--chat-bg-dark);
-        }
+        body.dark-theme #chat-container { background: var(--chat-bg-dark); }
 
         /* Encabezado del Chat */
         .chat-header {
@@ -87,158 +87,119 @@
             transition: color 0.3s ease;
         }
 
-        body.dark-theme .chat-header h1 {
-            color: var(--text-color-dark);
-        }
+        body.dark-theme .chat-header h1 { color: var(--text-color-dark); }
 
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
+        .header-buttons { display: flex; gap: 10px; }
         .header-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: #8a8d91;
-            transition: color 0.2s ease;
+            background: none; border: none; cursor: pointer;
+            font-size: 1.2rem; color: #8a8d91; transition: color 0.2s ease;
         }
         .header-btn:hover { color: var(--user-bubble-light); }
 
         /* Área de Mensajes */
         #message-container {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            flex-grow: 1; padding: 20px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 15px;
         }
 
         .message {
-            display: flex;
-            flex-direction: column;
-            max-width: 75%;
-            animation: fadeIn 0.5s ease-out;
+            display: flex; flex-direction: column;
+            max-width: 75%; animation: fadeIn 0.5s ease-out;
         }
-        
         .message .bubble {
-            padding: 10px 15px;
-            border-radius: 18px;
-            line-height: 1.5;
-            word-wrap: break-word;
+            padding: 10px 15px; border-radius: 18px;
+            line-height: 1.5; word-wrap: break-word;
         }
-        
         .message .timestamp {
-            font-size: 0.75rem;
-            color: #8a8d91;
-            margin-top: 5px;
-            padding: 0 5px;
+            font-size: 0.75rem; color: #8a8d91;
+            margin-top: 5px; padding: 0 5px;
         }
 
         .user-message { align-self: flex-end; }
         .user-message .bubble {
-            background: var(--user-bubble-light);
-            color: var(--text-user-light);
+            background: var(--user-bubble-light); color: var(--text-user-light);
             border-bottom-right-radius: 4px;
         }
         .user-message .timestamp { text-align: right; }
 
         .bot-message { align-self: flex-start; }
         .bot-message .bubble {
-            background: var(--bot-bubble-light);
-            color: var(--text-bot-light);
+            background: var(--bot-bubble-light); color: var(--text-bot-light);
             border-bottom-left-radius: 4px;
+        }
+        body.dark-theme .bot-message .bubble {
+            background: var(--bot-bubble-dark); color: var(--text-bot-dark);
         }
         .bot-message .timestamp { text-align: left; }
 
-        body.dark-theme .bot-message .bubble {
-            background: var(--bot-bubble-dark);
-            color: var(--text-bot-dark);
-        }
-
         /* Indicador de "Escribiendo..." */
-        .typing-indicator {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
         .typing-indicator .dot {
-            width: 8px;
-            height: 8px;
-            background-color: #b0b3b8;
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
+            width: 8px; height: 8px; background-color: #b0b3b8;
+            border-radius: 50%; animation: typing 1.4s infinite;
         }
+        .typing-indicator { display: flex; align-items: center; gap: 5px; }
         .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
 
         /* Área de Entrada */
-        .chat-input-area {
-            padding: 15px 20px;
-            border-top: 1px solid var(--border-color-light);
-            transition: border-color 0.3s ease;
-        }
-
-        body.dark-theme .chat-input-area {
-            border-top: 1px solid var(--border-color-dark);
-        }
-
-        #chat-form {
-            display: flex;
-            gap: 10px;
-        }
-
+        .chat-input-area { padding: 15px 20px; border-top: 1px solid var(--border-color-light); }
+        body.dark-theme .chat-input-area { border-top: 1px solid var(--border-color-dark); }
+        #chat-form { display: flex; gap: 10px; }
         #user-input {
-            flex-grow: 1;
-            border: none;
-            background: var(--input-bg-light);
-            border-radius: 18px;
-            padding: 12px 18px;
-            font-size: 1rem;
-            color: var(--text-color-light);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            flex-grow: 1; border: none; background: var(--input-bg-light);
+            border-radius: 18px; padding: 12px 18px; font-size: 1rem;
+            color: var(--text-color-light); transition: background-color 0.3s ease, color 0.3s ease;
         }
         #user-input:focus { outline: none; }
-        
-        body.dark-theme #user-input {
-            background: var(--input-bg-dark);
-            color: var(--text-color-dark);
-        }
-
+        body.dark-theme #user-input { background: var(--input-bg-dark); color: var(--text-color-dark); }
         #send-btn {
-            background: var(--user-bubble-light);
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s ease;
+            background: var(--user-bubble-light); border: none; border-radius: 50%;
+            width: 44px; height: 44px; display: flex; justify-content: center;
+            align-items: center; cursor: pointer; transition: transform 0.2s ease;
         }
         #send-btn:hover { transform: scale(1.1); }
         #send-btn svg { fill: white; }
+        
+        /* Panel de Depuración */
+        #debug-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 50vh;
+            background: var(--debug-bg-light);
+            color: var(--text-color-light);
+            border: 1px solid var(--border-color-light);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        body.dark-theme #debug-panel {
+            background: var(--debug-bg-dark);
+            color: var(--text-color-dark);
+            border-color: var(--border-color-dark);
+        }
+        #debug-panel.hidden { transform: translateY(20px); opacity: 0; pointer-events: none; }
+        .debug-header {
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color-light);
+            cursor: move;
+        }
+        body.dark-theme .debug-header { border-color: var(--border-color-dark); }
+        .debug-header h3 { margin: 0; font-size: 0.9rem; }
+        #debug-content { padding: 10px; overflow-y: auto; font-size: 0.8rem; }
+        #debug-content pre { margin: 5px 0; white-space: pre-wrap; word-wrap: break-word; }
 
         /* Animaciones y Media Queries */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
-        }
-
-        @media (max-width: 768px) {
-            #chat-container {
-                max-height: 100vh;
-                border-radius: 0;
-            }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+        @media (max-width: 768px) { #chat-container { max-height: 100vh; border-radius: 0; } }
     </style>
 </head>
 <body>
@@ -249,11 +210,12 @@
             <div class="header-buttons">
                 <button id="clear-chat-btn" class="header-btn" title="Limpiar Chat">🗑️</button>
                 <button id="theme-toggle-btn" class="header-btn" title="Cambiar Tema">🌙</button>
+                <button id="debug-toggle-btn" class="header-btn" title="Depuración">🐞</button>
             </div>
         </header>
 
         <main id="message-container">
-            <!-- Los mensajes del chat se agregarán aquí dinámicamente -->
+            <!-- Mensajes del chat aquí -->
         </main>
 
         <footer class="chat-input-area">
@@ -266,6 +228,16 @@
         </footer>
     </div>
 
+    <!-- Panel de Depuración -->
+    <div id="debug-panel" class="hidden">
+        <div class="debug-header">
+            <h3>Panel de Depuración</h3>
+            <button id="close-debug-btn" class="header-btn">&times;</button>
+        </div>
+        <div id="debug-content"></div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -273,29 +245,28 @@
             const LINDY_WEBHOOK_URL = 'https://public.lindy.ai/api/v1/webhooks/lindy/101d9e2e-6317-4b78-96ce-000963dfbecf';
             const LINDY_SECRET_KEY = '46ffb493d8a1383bf869d70db54a1adf68f0e9be39f6cad8bc1bc4b431107151';
 
-            // ADVERTENCIA DE SEGURIDAD:
-            // Exponer la clave secreta en el frontend es un riesgo de seguridad.
-            // Cualquiera puede ver esta clave y usarla para gastar tus tokens/créditos.
-            // Para producción, se recomienda usar un servidor intermediario que oculte la clave.
-
+            // --- SELECTORES DOM ---
             const chatForm = document.getElementById('chat-form');
             const userInput = document.getElementById('user-input');
             const messageContainer = document.getElementById('message-container');
             const themeToggleBtn = document.getElementById('theme-toggle-btn');
             const clearChatBtn = document.getElementById('clear-chat-btn');
+            const debugToggleBtn = document.getElementById('debug-toggle-btn');
+            const debugPanel = document.getElementById('debug-panel');
+            const closeDebugBtn = document.getElementById('close-debug-btn');
+            const debugContent = document.getElementById('debug-content');
 
             // --- MANEJO DE EVENTOS ---
             chatForm.addEventListener('submit', handleSendMessage);
             themeToggleBtn.addEventListener('click', toggleTheme);
             clearChatBtn.addEventListener('click', clearChat);
+            debugToggleBtn.addEventListener('click', () => debugPanel.classList.toggle('hidden'));
+            closeDebugBtn.addEventListener('click', () => debugPanel.classList.add('hidden'));
             
             loadInitialState();
 
             // --- FUNCIONES PRINCIPALES ---
 
-            /**
-             * Maneja el envío de mensajes del usuario.
-             */
             async function handleSendMessage(event) {
                 event.preventDefault();
                 const messageText = userInput.value.trim();
@@ -313,14 +284,15 @@
                     saveChatHistory();
                 } catch (error) {
                     removeTypingIndicator();
-                    const errorMessage = "Lo siento, no pude conectar con el asistente. Por favor, intenta de nuevo más tarde.";
+                    const errorMessage = "Lo siento, hubo un error. Revisa el panel de depuración para más detalles.";
                     addMessageToUI('bot', errorMessage, 'error');
-                    console.error("Webhook Error:", error);
+                    logToDebugPanel('Error en la Petición', error.toString());
                 }
             }
-
+            
             /**
-             * Envía el mensaje al webhook de Lindy y espera la respuesta.
+             * ✅ FUNCIÓN MEJORADA ✅
+             * Envía el mensaje y procesa inteligentemente la respuesta.
              */
             async function fetchAIResponse(message) {
                 const response = await fetch(LINDY_WEBHOOK_URL, {
@@ -333,75 +305,55 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`Error HTTP! Estado: ${response.status}`);
                 }
 
                 const data = await response.json();
+                
+                // Muestra la respuesta COMPLETA en el panel de depuración
+                logToDebugPanel('Respuesta de Lindy (Raw)', JSON.stringify(data, null, 2));
 
-                // Ajusta 'data.response' si el formato de Lindy es diferente
-                if (data && data.response) {
-                    return data.response;
-                } else if (data) {
-                    // Intenta encontrar una respuesta en otro campo si el formato varía
-                    return Object.values(data).join(' ') || "No se recibió una respuesta clara.";
-                } else {
-                    return "Respuesta vacía o en formato inesperado.";
-                }
+                // Lógica mejorada para encontrar el texto de la respuesta
+                if (typeof data === 'string') return data;
+                if (data && data.response) return data.response;
+                if (data && data.text) return data.text;
+                if (data && data.message) return data.message;
+                if (data && data.content) return data.content;
+                if (data) return JSON.stringify(data, null, 2); // Como último recurso, muestra el JSON formateado
+
+                return "No se recibió respuesta del asistente.";
             }
-
+            
             // --- FUNCIONES DE LA INTERFAZ (UI) ---
 
-            /**
-             * Añade un mensaje a la ventana del chat.
-             * @param {'user' | 'bot'} sender - Quién envía el mensaje.
-             * @param {string} text - El contenido del mensaje.
-             * @param {'normal' | 'error'} type - El tipo de mensaje.
-             */
             function addMessageToUI(sender, text, type = 'normal') {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${sender}-message`;
-
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
                 bubble.textContent = text;
-                if(type === 'error') bubble.style.color = 'red';
-
+                if (type === 'error') bubble.style.color = 'red';
                 const timestamp = document.createElement('div');
                 timestamp.className = 'timestamp';
                 timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
                 messageDiv.appendChild(bubble);
                 messageDiv.appendChild(timestamp);
                 messageContainer.appendChild(messageDiv);
-                
                 scrollToBottom();
             }
 
-            /**
-             * Muestra el indicador de "escribiendo...".
-             */
             function showTypingIndicator() {
                 const indicatorDiv = document.createElement('div');
                 indicatorDiv.className = 'message bot-message';
                 indicatorDiv.id = 'typing-indicator';
-                indicatorDiv.innerHTML = `
-                    <div class="bubble typing-indicator">
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                    </div>`;
+                indicatorDiv.innerHTML = `<div class="bubble typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
                 messageContainer.appendChild(indicatorDiv);
                 scrollToBottom();
             }
 
-            /**
-             * Elimina el indicador de "escribiendo...".
-             */
             function removeTypingIndicator() {
                 const indicator = document.getElementById('typing-indicator');
-                if (indicator) {
-                    indicator.remove();
-                }
+                if (indicator) indicator.remove();
             }
 
             function scrollToBottom() {
@@ -410,9 +362,6 @@
 
             // --- MANEJO DE ESTADO Y TEMA ---
 
-            /**
-             * Cambia entre el tema claro y oscuro.
-             */
             function toggleTheme() {
                 document.body.classList.toggle('dark-theme');
                 const isDark = document.body.classList.contains('dark-theme');
@@ -420,34 +369,22 @@
                 localStorage.setItem('chat-theme', isDark ? 'dark' : 'light');
             }
 
-            /**
-             * Limpia la ventana del chat y el historial.
-             */
             function clearChat() {
                 messageContainer.innerHTML = '';
                 localStorage.removeItem('chat-history');
                 addMessageToUI('bot', 'Hola, ¿en qué puedo ayudarte hoy?');
             }
 
-            /**
-             * Guarda el historial del chat en el almacenamiento local.
-             */
             function saveChatHistory() {
                 localStorage.setItem('chat-history', messageContainer.innerHTML);
             }
 
-            /**
-             * Carga el estado inicial (tema e historial) al abrir la página.
-             */
             function loadInitialState() {
-                // Cargar tema
                 const savedTheme = localStorage.getItem('chat-theme');
                 if (savedTheme === 'dark') {
                     document.body.classList.add('dark-theme');
                     themeToggleBtn.textContent = '☀️';
                 }
-
-                // Cargar historial
                 const savedHistory = localStorage.getItem('chat-history');
                 if (savedHistory) {
                     messageContainer.innerHTML = savedHistory;
@@ -455,6 +392,16 @@
                 } else {
                     addMessageToUI('bot', 'Hola, ¿en qué puedo ayudarte hoy?');
                 }
+            }
+            
+            /**
+             * Nueva función para mostrar logs en el panel de depuración.
+             */
+            function logToDebugPanel(title, content) {
+                const entry = document.createElement('div');
+                entry.innerHTML = `<strong>${title}:</strong><pre>${content}</pre>`;
+                debugContent.appendChild(entry);
+                debugContent.scrollTop = debugContent.scrollHeight; // Auto-scroll
             }
         });
     </script>
