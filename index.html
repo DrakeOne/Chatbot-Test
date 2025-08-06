@@ -967,30 +967,42 @@
             }
         };
 
-        // Elementos del DOM
-        const elements = {
-            sidebar: document.getElementById('sidebar'),
-            mobileOverlay: document.getElementById('mobileOverlay'),
-            menuToggle: document.getElementById('menuToggle'),
-            messagesContainer: document.getElementById('messagesContainer'),
-            messageInput: document.getElementById('messageInput'),
-            sendButton: document.getElementById('sendButton'),
-            typingIndicator: document.getElementById('typingIndicator'),
-            clearChatBtn: document.getElementById('clearChat'),
-            toggleThemeBtn: document.getElementById('toggleTheme'),
-            debugPanel: document.getElementById('debugPanel'),
-            debugContent: document.getElementById('debugContent'),
-            debugBadge: document.getElementById('debugBadge'),
-            statusDot: document.getElementById('statusDot'),
-            statusText: document.getElementById('statusText'),
-            settingsModal: document.getElementById('settingsModal'),
-            debugModeSwitch: document.getElementById('debugModeSwitch'),
-            saveHistorySwitch: document.getElementById('saveHistorySwitch'),
-            notificationsSwitch: document.getElementById('notificationsSwitch')
-        };
+        // Elementos del DOM - Inicializar después de que el DOM esté listo
+        let elements = {};
 
         // Inicialización
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            
+            // Inicializar elementos del DOM
+            elements = {
+                sidebar: document.getElementById('sidebar'),
+                mobileOverlay: document.getElementById('mobileOverlay'),
+                menuToggle: document.getElementById('menuToggle'),
+                messagesContainer: document.getElementById('messagesContainer'),
+                messageInput: document.getElementById('messageInput'),
+                sendButton: document.getElementById('sendButton'),
+                typingIndicator: document.getElementById('typingIndicator'),
+                clearChatBtn: document.getElementById('clearChat'),
+                toggleThemeBtn: document.getElementById('toggleTheme'),
+                debugPanel: document.getElementById('debugPanel'),
+                debugContent: document.getElementById('debugContent'),
+                debugBadge: document.getElementById('debugBadge'),
+                statusDot: document.getElementById('statusDot'),
+                statusText: document.getElementById('statusText'),
+                settingsModal: document.getElementById('settingsModal'),
+                debugModeSwitch: document.getElementById('debugModeSwitch'),
+                saveHistorySwitch: document.getElementById('saveHistorySwitch'),
+                notificationsSwitch: document.getElementById('notificationsSwitch')
+            };
+            
+            // Verificar que todos los elementos existan
+            for (const [key, element] of Object.entries(elements)) {
+                if (!element) {
+                    console.error(`Element not found: ${key}`);
+                }
+            }
+            
             initializeApp();
             setupEventListeners();
             detectLindyWidget();
@@ -998,118 +1010,178 @@
         });
 
         function initializeApp() {
-            // Cargar configuración
-            loadSettings();
-            
-            // Cargar tema
-            const savedTheme = localStorage.getItem('chatTheme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
+            try {
+                // Cargar configuración
+                loadSettings();
+                
+                // Cargar tema
+                const savedTheme = localStorage.getItem('chatTheme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
 
-            // Cargar mensajes si está habilitado
-            if (appState.settings.saveHistory) {
-                const savedMessages = localStorage.getItem('chatMessages');
-                if (savedMessages) {
-                    appState.messages = JSON.parse(savedMessages);
-                    renderMessages();
+                // Cargar mensajes si está habilitado
+                if (appState.settings.saveHistory) {
+                    const savedMessages = localStorage.getItem('chatMessages');
+                    if (savedMessages) {
+                        appState.messages = JSON.parse(savedMessages);
+                        renderMessages();
+                    } else {
+                        addMessage('assistant', '¡Hola! Soy tu asistente AI. ¿En qué puedo ayudarte hoy?');
+                    }
                 } else {
                     addMessage('assistant', '¡Hola! Soy tu asistente AI. ¿En qué puedo ayudarte hoy?');
                 }
-            } else {
-                addMessage('assistant', '¡Hola! Soy tu asistente AI. ¿En qué puedo ayudarte hoy?');
+            } catch (error) {
+                console.error('Error initializing app:', error);
             }
         }
 
         function loadSettings() {
-            const savedSettings = localStorage.getItem('appSettings');
-            if (savedSettings) {
-                appState.settings = JSON.parse(savedSettings);
-                elements.debugModeSwitch.checked = appState.settings.debugMode;
-                elements.saveHistorySwitch.checked = appState.settings.saveHistory;
-                elements.notificationsSwitch.checked = appState.settings.notifications;
+            try {
+                const savedSettings = localStorage.getItem('appSettings');
+                if (savedSettings) {
+                    appState.settings = JSON.parse(savedSettings);
+                    if (elements.debugModeSwitch) elements.debugModeSwitch.checked = appState.settings.debugMode;
+                    if (elements.saveHistorySwitch) elements.saveHistorySwitch.checked = appState.settings.saveHistory;
+                    if (elements.notificationsSwitch) elements.notificationsSwitch.checked = appState.settings.notifications;
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
             }
         }
 
         function saveSettings() {
-            localStorage.setItem('appSettings', JSON.stringify(appState.settings));
+            try {
+                localStorage.setItem('appSettings', JSON.stringify(appState.settings));
+            } catch (error) {
+                console.error('Error saving settings:', error);
+            }
         }
 
         function setupEventListeners() {
-            // Menu toggle
-            elements.menuToggle.addEventListener('click', toggleSidebar);
-            elements.mobileOverlay.addEventListener('click', closeSidebar);
-
-            // Menu items
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', handleMenuAction);
-            });
-
-            // Chat controls
-            elements.sendButton.addEventListener('click', sendMessage);
-            elements.messageInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
+            try {
+                // Menu toggle
+                if (elements.menuToggle) {
+                    elements.menuToggle.addEventListener('click', toggleSidebar);
                 }
-            });
-
-            // Auto-resize textarea
-            elements.messageInput.addEventListener('input', () => {
-                elements.messageInput.style.height = 'auto';
-                elements.messageInput.style.height = elements.messageInput.scrollHeight + 'px';
-            });
-
-            // Clear chat
-            elements.clearChatBtn.addEventListener('click', () => {
-                if (confirm('¿Estás seguro de que quieres limpiar el chat?')) {
-                    clearChat();
+                
+                if (elements.mobileOverlay) {
+                    elements.mobileOverlay.addEventListener('click', closeSidebar);
                 }
-            });
 
-            // Theme toggle
-            elements.toggleThemeBtn.addEventListener('click', toggleTheme);
+                // Menu items
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', handleMenuAction);
+                });
 
-            // Debug panel
-            document.getElementById('debugPanelToggle').addEventListener('click', () => toggleDebugPanel());
-            document.getElementById('closeDebug').addEventListener('click', () => toggleDebugPanel(false));
-            document.getElementById('clearDebug').addEventListener('click', clearDebugLogs);
-
-            // Settings
-            document.getElementById('closeSettings').addEventListener('click', () => {
-                elements.settingsModal.classList.remove('active');
-            });
-
-            // Settings switches
-            elements.debugModeSwitch.addEventListener('change', (e) => {
-                appState.settings.debugMode = e.target.checked;
-                saveSettings();
-                logDebug(`Modo debug: ${e.target.checked ? 'activado' : 'desactivado'}`, 'info');
-            });
-
-            elements.saveHistorySwitch.addEventListener('change', (e) => {
-                appState.settings.saveHistory = e.target.checked;
-                saveSettings();
-                if (!e.target.checked) {
-                    localStorage.removeItem('chatMessages');
+                // Chat controls
+                if (elements.sendButton) {
+                    elements.sendButton.addEventListener('click', sendMessage);
                 }
-            });
+                
+                if (elements.messageInput) {
+                    elements.messageInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                        }
+                    });
 
-            elements.notificationsSwitch.addEventListener('change', (e) => {
-                appState.settings.notifications = e.target.checked;
-                saveSettings();
-                if (e.target.checked) {
-                    requestNotificationPermission();
+                    // Auto-resize textarea
+                    elements.messageInput.addEventListener('input', () => {
+                        elements.messageInput.style.height = 'auto';
+                        elements.messageInput.style.height = elements.messageInput.scrollHeight + 'px';
+                    });
                 }
-            });
+
+                // Clear chat
+                if (elements.clearChatBtn) {
+                    elements.clearChatBtn.addEventListener('click', () => {
+                        if (confirm('¿Estás seguro de que quieres limpiar el chat?')) {
+                            clearChat();
+                        }
+                    });
+                }
+
+                // Theme toggle
+                if (elements.toggleThemeBtn) {
+                    elements.toggleThemeBtn.addEventListener('click', toggleTheme);
+                }
+
+                // Debug panel
+                const debugPanelToggle = document.getElementById('debugPanelToggle');
+                if (debugPanelToggle) {
+                    debugPanelToggle.addEventListener('click', () => toggleDebugPanel());
+                }
+                
+                const closeDebug = document.getElementById('closeDebug');
+                if (closeDebug) {
+                    closeDebug.addEventListener('click', () => toggleDebugPanel(false));
+                }
+                
+                const clearDebug = document.getElementById('clearDebug');
+                if (clearDebug) {
+                    clearDebug.addEventListener('click', clearDebugLogs);
+                }
+
+                // Settings
+                const closeSettings = document.getElementById('closeSettings');
+                if (closeSettings) {
+                    closeSettings.addEventListener('click', () => {
+                        if (elements.settingsModal) {
+                            elements.settingsModal.classList.remove('active');
+                        }
+                    });
+                }
+
+                // Settings switches
+                if (elements.debugModeSwitch) {
+                    elements.debugModeSwitch.addEventListener('change', (e) => {
+                        appState.settings.debugMode = e.target.checked;
+                        saveSettings();
+                        logDebug(`Modo debug: ${e.target.checked ? 'activado' : 'desactivado'}`, 'info');
+                    });
+                }
+
+                if (elements.saveHistorySwitch) {
+                    elements.saveHistorySwitch.addEventListener('change', (e) => {
+                        appState.settings.saveHistory = e.target.checked;
+                        saveSettings();
+                        if (!e.target.checked) {
+                            localStorage.removeItem('chatMessages');
+                        }
+                    });
+                }
+
+                if (elements.notificationsSwitch) {
+                    elements.notificationsSwitch.addEventListener('change', (e) => {
+                        appState.settings.notifications = e.target.checked;
+                        saveSettings();
+                        if (e.target.checked) {
+                            requestNotificationPermission();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error setting up event listeners:', error);
+            }
         }
 
         function toggleSidebar() {
-            elements.sidebar.classList.toggle('collapsed');
-            elements.mobileOverlay.classList.toggle('active');
+            if (elements.sidebar) {
+                elements.sidebar.classList.toggle('collapsed');
+            }
+            if (elements.mobileOverlay) {
+                elements.mobileOverlay.classList.toggle('active');
+            }
         }
 
         function closeSidebar() {
-            elements.sidebar.classList.add('collapsed');
-            elements.mobileOverlay.classList.remove('active');
+            if (elements.sidebar) {
+                elements.sidebar.classList.add('collapsed');
+            }
+            if (elements.mobileOverlay) {
+                elements.mobileOverlay.classList.remove('active');
+            }
         }
 
         function handleMenuAction(e) {
@@ -1137,7 +1209,9 @@
                     closeSidebar();
                     break;
                 case 'settings':
-                    elements.settingsModal.classList.add('active');
+                    if (elements.settingsModal) {
+                        elements.settingsModal.classList.add('active');
+                    }
                     closeSidebar();
                     break;
             }
@@ -1156,30 +1230,46 @@
             if (appState.settings.saveHistory) {
                 localStorage.removeItem('chatMessages');
             }
-            elements.messagesContainer.innerHTML = '';
+            if (elements.messagesContainer) {
+                elements.messagesContainer.innerHTML = '';
+            }
             addMessage('assistant', '¡Chat limpiado! ¿En qué puedo ayudarte?');
             logDebug('Chat limpiado', 'info');
         }
 
         function toggleDebugPanel(show = null) {
+            if (!elements.debugPanel) return;
+            
             const isActive = elements.debugPanel.classList.contains('active');
             const shouldShow = show !== null ? show : !isActive;
             
             if (shouldShow) {
                 elements.debugPanel.classList.add('active');
-                document.getElementById('debugPanelToggle').classList.add('active');
-                elements.debugBadge.style.display = 'none';
+                const debugPanelToggle = document.getElementById('debugPanelToggle');
+                if (debugPanelToggle) {
+                    debugPanelToggle.classList.add('active');
+                }
+                if (elements.debugBadge) {
+                    elements.debugBadge.style.display = 'none';
+                }
             } else {
                 elements.debugPanel.classList.remove('active');
-                document.getElementById('debugPanelToggle').classList.remove('active');
+                const debugPanelToggle = document.getElementById('debugPanelToggle');
+                if (debugPanelToggle) {
+                    debugPanelToggle.classList.remove('active');
+                }
             }
         }
 
         function clearDebugLogs() {
             appState.debugLogs = [];
-            elements.debugContent.innerHTML = '';
-            elements.debugBadge.textContent = '0';
-            elements.debugBadge.style.display = 'none';
+            if (elements.debugContent) {
+                elements.debugContent.innerHTML = '';
+            }
+            if (elements.debugBadge) {
+                elements.debugBadge.textContent = '0';
+                elements.debugBadge.style.display = 'none';
+            }
         }
 
         function logDebug(message, type = 'info') {
@@ -1193,23 +1283,24 @@
             appState.debugLogs.push(logEntry);
             
             // Actualizar badge
-            if (!elements.debugPanel.classList.contains('active')) {
-                const badge = elements.debugBadge;
-                const count = parseInt(badge.textContent || '0') + 1;
-                badge.textContent = count;
-                badge.style.display = 'block';
+            if (elements.debugPanel && !elements.debugPanel.classList.contains('active') && elements.debugBadge) {
+                const count = parseInt(elements.debugBadge.textContent || '0') + 1;
+                elements.debugBadge.textContent = count;
+                elements.debugBadge.style.display = 'block';
             }
             
             // Agregar al panel
-            const logDiv = document.createElement('div');
-            logDiv.className = `log-entry ${type}`;
-            logDiv.innerHTML = `
-                <span class="log-time">${timestamp}</span>
-                <span class="log-message">${message}</span>
-            `;
-            
-            elements.debugContent.appendChild(logDiv);
-            elements.debugContent.scrollTop = elements.debugContent.scrollHeight;
+            if (elements.debugContent) {
+                const logDiv = document.createElement('div');
+                logDiv.className = `log-entry ${type}`;
+                logDiv.innerHTML = `
+                    <span class="log-time">${timestamp}</span>
+                    <span class="log-message">${message}</span>
+                `;
+                
+                elements.debugContent.appendChild(logDiv);
+                elements.debugContent.scrollTop = elements.debugContent.scrollHeight;
+            }
             
             // También log en consola si debug mode está activo
             if (appState.settings.debugMode) {
@@ -1218,25 +1309,24 @@
         }
 
         function updateStatus(status, message) {
-            const statusDot = elements.statusDot;
-            const statusText = elements.statusText;
+            if (!elements.statusDot || !elements.statusText) return;
             
-            statusDot.className = 'status-dot';
+            elements.statusDot.className = 'status-dot';
             
             switch (status) {
                 case 'connected':
-                    statusDot.classList.add('connected');
-                    statusText.textContent = message || 'Conectado';
+                    elements.statusDot.classList.add('connected');
+                    elements.statusText.textContent = message || 'Conectado';
                     logDebug('Estado: Conectado', 'success');
                     break;
                 case 'connecting':
-                    statusDot.classList.add('connecting');
-                    statusText.textContent = message || 'Conectando...';
+                    elements.statusDot.classList.add('connecting');
+                    elements.statusText.textContent = message || 'Conectando...';
                     logDebug('Estado: Conectando', 'warning');
                     break;
                 case 'error':
-                    statusDot.classList.add('error');
-                    statusText.textContent = message || 'Error';
+                    elements.statusDot.classList.add('error');
+                    elements.statusText.textContent = message || 'Error';
                     logDebug(`Estado: Error - ${message}`, 'error');
                     break;
             }
@@ -1272,6 +1362,8 @@
         }
 
         function renderMessage(message) {
+            if (!elements.messagesContainer) return;
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${message.type}`;
             
@@ -1299,24 +1391,32 @@
         }
 
         function renderMessages() {
+            if (!elements.messagesContainer) return;
+            
             elements.messagesContainer.innerHTML = '';
             appState.messages.forEach(message => renderMessage(message));
             scrollToBottom();
         }
 
         function scrollToBottom() {
+            if (!elements.messagesContainer) return;
+            
             setTimeout(() => {
                 elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
             }, 100);
         }
 
         function showTypingIndicator() {
-            elements.typingIndicator.classList.add('active');
-            scrollToBottom();
+            if (elements.typingIndicator) {
+                elements.typingIndicator.classList.add('active');
+                scrollToBottom();
+            }
         }
 
         function hideTypingIndicator() {
-            elements.typingIndicator.classList.remove('active');
+            if (elements.typingIndicator) {
+                elements.typingIndicator.classList.remove('active');
+            }
         }
 
         function showNotification(message, type = 'info') {
@@ -1340,6 +1440,8 @@
         }
 
         async function sendMessage() {
+            if (!elements.messageInput) return;
+            
             const message = elements.messageInput.value.trim();
             if (!message || appState.isWaitingResponse) return;
             
@@ -1353,7 +1455,9 @@
             // Mostrar indicador de escritura
             showTypingIndicator();
             appState.isWaitingResponse = true;
-            elements.sendButton.disabled = true;
+            if (elements.sendButton) {
+                elements.sendButton.disabled = true;
+            }
             
             logDebug(`Enviando mensaje: "${message}"`, 'info');
             
@@ -1375,12 +1479,18 @@
                 showError('Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.');
             } finally {
                 appState.isWaitingResponse = false;
-                elements.sendButton.disabled = false;
-                elements.messageInput.focus();
+                if (elements.sendButton) {
+                    elements.sendButton.disabled = false;
+                }
+                if (elements.messageInput) {
+                    elements.messageInput.focus();
+                }
             }
         }
 
         function showError(message) {
+            if (!elements.messagesContainer) return;
+            
             const errorDiv = document.createElement('div');
             errorDiv.className = 'message assistant';
             errorDiv.innerHTML = `
@@ -1448,7 +1558,9 @@
                         hideTypingIndicator();
                         addMessage('assistant', response);
                         appState.isWaitingResponse = false;
-                        elements.sendButton.disabled = false;
+                        if (elements.sendButton) {
+                            elements.sendButton.disabled = false;
+                        }
                     }
                 }
             }
@@ -1465,7 +1577,9 @@
                             hideTypingIndicator();
                             addMessage('assistant', possibleResponse);
                             appState.isWaitingResponse = false;
-                            elements.sendButton.disabled = false;
+                            if (elements.sendButton) {
+                                elements.sendButton.disabled = false;
+                            }
                         }
                     }
                 });
