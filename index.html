@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface - Powered by Lindy</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f7f8;
+            --bg-tertiary: #ececec;
+            --text-primary: #2d2d2d;
+            --text-secondary: #5c5c5c;
+            --border-color: #e5e5e5;
+            --user-msg-bg: #007aff;
+            --ai-msg-bg: #f0f0f0;
+            --user-msg-text: #ffffff;
+            --ai-msg-text: #2d2d2d;
+            --input-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #ececec;
+            --text-secondary: #a8a8a8;
+            --border-color: #2d2d2d;
+            --user-msg-bg: #007aff;
+            --ai-msg-bg: #2d2d2d;
+            --user-msg-text: #ffffff;
+            --ai-msg-text: #ececec;
+            --input-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Ocultar completamente el widget de Lindy */
+        #lindy-embed-container,
+        .lindy-embed,
+        iframe[src*="lindy.ai"],
+        [class*="lindy"],
+        [id*="lindy"] {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
+            position: absolute !important;
+            left: -9999px !important;
+            top: -9999px !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            height: 100vh;
+        }
+
+        .chat-header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .avatar {
+            background-color: var(--user-msg-bg);
+            color: var(--user-msg-text);
+        }
+
+        .message-content {
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background-color: var(--user-msg-bg);
+            color: var(--user-msg-text);
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.assistant .message-content {
+            background-color: var(--ai-msg-bg);
+            color: var(--ai-msg-text);
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .input-container {
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 0.5rem 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--user-msg-bg);
+        }
+
+        #messageInput {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            color: var(--text-primary);
+            resize: none;
+            min-height: 24px;
+            max-height: 120px;
+        }
+
+        #sendButton {
+            background-color: var(--user-msg-bg);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        #sendButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #sendButton:not(:disabled):hover {
+            opacity: 0.9;
+        }
+
+        .error-message {
+            background-color: #ff3b30;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .message {
+                max-width: 90%;
+            }
+            
+            .chat-header {
+                padding: 0.75rem 1rem;
+            }
+            
+            .messages-container {
+                padding: 1rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1 class="header-title">AI Assistant</h1>
+            <div class="header-actions">
+                <button class="btn-icon" id="clearChat" title="Limpiar chat">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+                    </svg>
+                </button>
+                <button class="btn-icon" id="toggleTheme" title="Cambiar tema">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+            <!-- Los mensajes se agregarán aquí dinámicamente -->
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="avatar">AI</div>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="Escribe un mensaje..."
+                    rows="1"
+                ></textarea>
+                <button id="sendButton">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor oculto para el widget de Lindy -->
+    <div id="lindy-embed-container" style="display: none !important;"></div>
+
+    <!-- Script de Lindy Embed -->
+    <script async src="https://api.lindy.ai/api/lindyEmbed/lindyEmbed.js?a=83e46cf6-d764-416d-ae34-9e5d21f99b5f" crossorigin="use-credentials"></script>
+
+    <script>
+        // Configuración y estado de la aplicación
+        const chatState = {
+            messages: [],
+            isWaitingResponse: false,
+            lindyReady: false,
+            communicationMethod: null
+        };
+
+        // Elementos del DOM
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const clearChatBtn = document.getElementById('clearChat');
+        const toggleThemeBtn = document.getElementById('toggleTheme');
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeChat();
+            setupEventListeners();
+            detectLindyWidget();
+        });
+
+        function initializeChat() {
+            // Cargar tema guardado
+            const savedTheme = localStorage.getItem('chatTheme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            // Cargar mensajes guardados
+            const savedMessages = localStorage.getItem('chatMessages');
+            if (savedMessages) {
+                chatState.messages = JSON.parse(savedMessages);
+                renderMessages();
+            } else {
+                addMessage('assistant', '¡Hola! Soy tu asistente AI. ¿En qué puedo ayudarte hoy?');
+            }
+        }
+
+        function setupEventListeners() {
+            // Enviar mensaje
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize del textarea
+            messageInput.addEventListener('input', () => {
+                messageInput.style.height = 'auto';
+                messageInput.style.height = messageInput.scrollHeight + 'px';
+            });
+
+            // Limpiar chat
+            clearChatBtn.addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que quieres limpiar el chat?')) {
+                    chatState.messages = [];
+                    localStorage.removeItem('chatMessages');
+                    messagesContainer.innerHTML = '';
+                    addMessage('assistant', '¡Chat limpiado! ¿En qué puedo ayudarte?');
+                }
+            });
+
+            // Cambiar tema
+            toggleThemeBtn.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('chatTheme', newTheme);
+            });
+        }
+
+        function addMessage(type, content) {
+            const timestamp = new Date().toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            const message = { type, content, timestamp };
+            chatState.messages.push(message);
+            
+            // Guardar en localStorage
+            localStorage.setItem('chatMessages', JSON.stringify(chatState.messages));
+            
+            // Renderizar mensaje
+            renderMessage(message);
+            
+            // Scroll al último mensaje
+            scrollToBottom();
+        }
+
+        function renderMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.type}`;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'avatar';
+            avatarDiv.textContent = message.type === 'user' ? 'U' : 'AI';
+            
+            const contentWrapper = document.createElement('div');
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = message.content;
+            
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'timestamp';
+            timestampDiv.textContent = message.timestamp;
+            
+            contentWrapper.appendChild(contentDiv);
+            contentWrapper.appendChild(timestampDiv);
+            
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentWrapper);
+            
+            messagesContainer.appendChild(messageDiv);
+        }
+
+        function renderMessages() {
+            messagesContainer.innerHTML = '';
+            chatState.messages.forEach(message => renderMessage(message));
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 100);
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.classList.add('active');
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.classList.remove('active');
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || chatState.isWaitingResponse) return;
+            
+            // Limpiar input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Agregar mensaje del usuario
+            addMessage('user', message);
+            
+            // Mostrar indicador de escritura
+            showTypingIndicator();
+            chatState.isWaitingResponse = true;
+            sendButton.disabled = true;
+            
+            try {
+                // Intentar enviar mensaje a Lindy
+                const response = await sendToLindy(message);
+                hideTypingIndicator();
+                
+                if (response) {
+                    addMessage('assistant', response);
+                } else {
+                    throw new Error('No se pudo obtener respuesta');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                hideTypingIndicator();
+                showError('Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.');
+            } finally {
+                chatState.isWaitingResponse = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            messagesContainer.appendChild(errorDiv);
+            scrollToBottom();
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // Métodos de comunicación con Lindy
+        async function detectLindyWidget() {
+            let attempts = 0;
+            const maxAttempts = 50;
+            
+            const detectInterval = setInterval(() => {
+                attempts++;
+                
+                // Buscar el iframe de Lindy
+                const lindyIframe = document.querySelector('iframe[src*="lindy.ai"]');
+                const lindyContainer = document.querySelector('[class*="lindy"], [id*="lindy"]');
+                
+                if (lindyIframe || lindyContainer || window.lindy) {
+                    clearInterval(detectInterval);
+                    console.log('Widget de Lindy detectado');
+                    chatState.lindyReady = true;
+                    setupLindyCommunication();
+                }
+                
+                if (attempts >= maxAttempts) {
+                    clearInterval(detectInterval);
+                    console.warn('No se pudo detectar el widget de Lindy');
+                    setupFallbackCommunication();
+                }
+            }, 200);
+        }
+
+        function setupLindyCommunication() {
+            // Intentar configurar PostMessage listener
+            window.addEventListener('message', handleLindyMessage);
+            
+            // Configurar MutationObserver para detectar cambios en el DOM
+            setupMutationObserver();
+            
+            // Determinar método de comunicación
+            testCommunicationMethods();
+        }
+
+        function handleLindyMessage(event) {
+            // Verificar si el mensaje es de Lindy
+            if (event.origin.includes('lindy.ai')) {
+                console.log('Mensaje recibido de Lindy:', event.data);
+                
+                if (event.data.type === 'response' || event.data.message) {
+                    const response = event.data.message || event.data.content;
+                    if (response && chatState.isWaitingResponse) {
+                        hideTypingIndicator();
+                        addMessage('assistant', response);
+                        chatState.isWaitingResponse = false;
+                        sendButton.disabled = false;
+                    }
+                }
+            }
+        }
+
+        function setupMutationObserver() {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        // Buscar cambios en elementos que puedan contener respuestas
+                        const possibleResponse = extractResponseFromDOM();
+                        if (possibleResponse && chatState.isWaitingResponse) {
+                            hideTypingIndicator();
+                            addMessage('assistant', possibleResponse);
+                            chatState.isWaitingResponse = false;
+                            sendButton.disabled = false;
+                        }
+                    }
+                });
+            });
+            
+            // Observar todo el documento buscando cambios
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                characterData: true
+            });
+        }
+
+        function extractResponseFromDOM() {
+            // Buscar en posibles contenedores de respuesta
+            const selectors = [
+                '[class*="message"]:last-child',
+                '[class*="response"]:last-child',
+                '[class*="lindy"] [class*="text"]:last-child',
+                '[class*="chat"] [class*="bubble"]:last-child'
+            ];
+            
+            for (const selector of selectors) {
+                const element = document.querySelector(selector);
+                if (element && element.textContent.trim()) {
+                    const text = element.textContent.trim();
+                    // Verificar que no sea nuestro propio mensaje
+                    const lastUserMessage = chatState.messages
+                        .filter(m => m.type === 'user')
+                        .pop();
+                    
+                    if (lastUserMessage && text !== lastUserMessage.content) {
+                        return text;
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        async function testCommunicationMethods() {
+            // Probar diferentes métodos para determinar cuál funciona
+            
+            // Método 1: PostMessage
+            if (window.lindy && typeof window.lindy.postMessage === 'function') {
+                chatState.communicationMethod = 'postMessage';
+                console.log('Usando método: PostMessage');
+                return;
+            }
+            
+            // Método 2: API directa
+            if (window.lindy && typeof window.lindy.sendMessage === 'function') {
+                chatState.communicationMethod = 'api';
+                console.log('Usando método: API directa');
+                return;
+            }
+            
+            // Método 3: Simulación de input
+            const lindyInput = findLindyInput();
+            if (lindyInput) {
+                chatState.communicationMethod = 'domInput';
+                console.log('Usando método: Simulación de input');
+                return;
+            }
+            
+            // Método 4: Fallback
+            chatState.communicationMethod = 'fallback';
+            console.log('Usando método: Fallback');
+        }
+
+        function findLindyInput() {
+            const possibleSelectors = [
+                'input[type="text"]',
+                'textarea',
+                '[contenteditable="true"]',
+                '[role="textbox"]'
+            ];
+            
+            for (const selector of possibleSelectors) {
+                const elements = document.querySelectorAll(selector);
+                for (const element of elements) {
+                    // Verificar si el elemento pertenece a Lindy
+                    if (element.closest('[class*="lindy"], [id*="lindy"], iframe')) {
+                        return element;
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        async function sendToLindy(message) {
+            switch (chatState.communicationMethod) {
+                case 'postMessage':
+                    return sendViaPostMessage(message);
+                
+                case 'api':
+                    return sendViaAPI(message);
+                
+                case 'domInput':
+                    return sendViaDOMInput(message);
+                
+                default:
+                    return sendViaFallback(message);
+            }
+        }
+
+        async function sendViaPostMessage(message) {
+            return new Promise((resolve) => {
+                // Configurar listener temporal para la respuesta
+                const responseHandler = (event) => {
+                    if (event.origin.includes('lindy.ai') && event.data.type === 'response') {
+                        window.removeEventListener('message', responseHandler);
+                        resolve(event.data.message || event.data.content);
+                    }
+                };
+                
+                window.addEventListener('message', responseHandler);
+                
+                // Encontrar iframe de Lindy y enviar mensaje
+                const lindyIframe = document.querySelector('iframe[src*="lindy.ai"]');
+                if (lindyIframe && lindyIframe.contentWindow) {
+                    lindyIframe.contentWindow.postMessage({
+                        type: 'message',
+                        content: message
+                    }, '*');
+                }
+                
+                // Timeout de seguridad
+                setTimeout(() => {
+                    window.removeEventListener('message', responseHandler);
+                    resolve(null);
+                }, 10000);
+            });
+        }
+
+        async function sendViaAPI(message) {
+            if (window.lindy && typeof window.lindy.sendMessage === 'function') {
+                try {
+                    const response = await window.lindy.sendMessage(message);
+                    return response;
+                } catch (error) {
+                    console.error('Error en API:', error);
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        async function sendViaDOMInput(message) {
+            return new Promise((resolve) => {
+                const input = findLindyInput();
+                if (!input) {
+                    resolve(null);
+                    return;
+                }
+                
+                // Simular escritura
+                input.value = message;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                
+                // Simular envío
+                const submitButton = input.closest('form')?.querySelector('button[type="submit"]') ||
+                                   input.parentElement?.querySelector('button');
+                
+                if (submitButton) {
+                    submitButton.click();
+                } else {
+                    // Simular Enter
+                    input.dispatchEvent(new KeyboardEvent('keydown', {
+                        key: 'Enter',
+                        keyCode: 13,
+                        bubbles: true
+                    }));
+                }
+                
+                // Esperar respuesta con timeout
+                let responseFound = false;
+                const checkInterval = setInterval(() => {
+                    const response = extractResponseFromDOM();
+                    if (response) {
+                        responseFound = true;
+                        clearInterval(checkInterval);
+                        resolve(response);
+                    }
+                }, 500);
+                
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    if (!responseFound) {
+                        resolve(null);
+                    }
+                }, 10000);
+            });
+        }
+
+        async function sendViaFallback(message) {
+            // Simular una respuesta después de un delay
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve('Lo siento, no pude conectarme correctamente con el servicio de Lindy. Por favor, recarga la página e intenta de nuevo.');
+                }, 2000);
+            });
+        }
+
+        function setupFallbackCommunication() {
+            chatState.communicationMethod = 'fallback';
+            console.warn('Usando comunicación de respaldo');
+        }
+    </script>
+</body>
+</html>
