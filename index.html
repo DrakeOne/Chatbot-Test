@@ -3,236 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lindy AI Chat con Memoria</title>
+    <title>Deltarune Chat</title>
     <style>
-        /* El CSS es el mismo que en la versión anterior: completo y funcional */
-        :root{--bg-color-light:#f0f2f5;--chat-bg-light:#fff;--text-color-light:#050505;--input-bg-light:#f0f2f5;--user-bubble-light:#0084ff;--bot-bubble-light:#e4e6eb;--text-user-light:#fff;--text-bot-light:#050505;--header-bg-light:#fff;--border-color-light:#ced0d4;--debug-bg-light:#fafafa;--bg-color-dark:#121212;--chat-bg-dark:#1e1e1e;--text-color-dark:#e4e6eb;--input-bg-dark:#3a3b3c;--user-bubble-dark:#0084ff;--bot-bubble-dark:#3a3b3c;--text-user-dark:#fff;--text-bot-dark:#e4e6eb;--header-bg-dark:#242526;--border-color-dark:#3a3b3c;--debug-bg-dark:#2d2d2d}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:var(--bg-color-light);transition:background-color .3s ease}body.dark-theme{background:var(--bg-color-dark)}#chat-container{width:100%;height:100%;max-width:800px;max-height:95vh;display:flex;flex-direction:column;background:var(--chat-bg-light);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);overflow:hidden;transition:background-color .3s ease;position:relative;z-index:10}body.dark-theme #chat-container{background:var(--chat-bg-dark)}.chat-header{padding:10px 20px;display:flex;justify-content:space-between;align-items:center;background:var(--header-bg-light);border-bottom:1px solid var(--border-color-light);transition:background-color .3s ease,border-color .3s ease}body.dark-theme .chat-header{background:var(--header-bg-dark);border-bottom:1px solid var(--border-color-dark)}.chat-header h1{color:var(--text-color-light);font-size:1.2rem;margin:0;transition:color .3s ease}body.dark-theme .chat-header h1{color:var(--text-color-dark)}.header-buttons{display:flex;gap:10px}.header-btn{background:0 0;border:none;cursor:pointer;font-size:1.2rem;color:#8a8d91;transition:color .2s ease}.header-btn:hover{color:var(--user-bubble-light)}#message-container{flex-grow:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:15px}.message{display:flex;flex-direction:column;max-width:75%;animation:fadeIn .5s ease-out}.message .bubble{padding:10px 15px;border-radius:18px;line-height:1.5;word-wrap:break-word}.message .timestamp{font-size:.75rem;color:#8a8d91;margin-top:5px;padding:0 5px}.user-message{align-self:flex-end}.user-message .bubble{background:var(--user-bubble-light);color:var(--text-user-light);border-bottom-right-radius:4px}.user-message .timestamp{text-align:right}.bot-message{align-self:flex-start}.bot-message .bubble{background:var(--bot-bubble-light);color:var(--text-bot-light);border-bottom-left-radius:4px}body.dark-theme .bot-message .bubble{background:var(--bot-bubble-dark);color:var(--text-bot-dark)}.bot-message .timestamp{text-align:left}.typing-indicator .dot{width:8px;height:8px;background-color:#b0b3b8;border-radius:50%;animation:typing 1.4s infinite}.typing-indicator{display:flex;align-items:center;gap:5px}.typing-indicator .dot:nth-child(2){animation-delay:.2s}.typing-indicator .dot:nth-child(3){animation-delay:.4s}.chat-input-area{padding:15px 20px;border-top:1px solid var(--border-color-light)}body.dark-theme .chat-input-area{border-top:1px solid var(--border-color-dark)}#chat-form{display:flex;gap:10px}#user-input{flex-grow:1;border:none;background:var(--input-bg-light);border-radius:18px;padding:12px 18px;font-size:1rem;color:var(--text-color-light);transition:background-color .3s ease,color .3s ease}#user-input:focus{outline:0}body.dark-theme #user-input{background:var(--input-bg-dark);color:var(--text-color-dark)}#send-btn{background:var(--user-bubble-light);border:none;border-radius:50%;width:44px;height:44px;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:transform .2s ease}#send-btn:hover{transform:scale(1.1)}#send-btn svg{fill:#fff}#debug-panel{position:fixed;bottom:20px;right:20px;width:350px;max-height:50vh;background:var(--debug-bg-light);color:var(--text-color-light);border:1px solid var(--border-color-light);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:1000;display:flex;flex-direction:column;transition:all .3s ease}body.dark-theme #debug-panel{background:var(--debug-bg-dark);color:var(--text-color-dark);border-color:var(--border-color-dark)}#debug-panel.hidden{transform:translateY(20px);opacity:0;pointer-events:none}.debug-header{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color-light);cursor:move}body.dark-theme .debug-header{border-color:var(--border-color-dark)}.debug-header h3{margin:0;font-size:.9rem}#debug-content{padding:10px;overflow-y:auto;font-size:.8rem}#debug-content pre{margin:5px 0;white-space:pre-wrap;word-wrap:break-word}@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}@media (max-width:768px){#chat-container{max-height:100vh;border-radius:0}}
+        /* Importar la fuente pixelada de Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        /* Estilos Generales */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        /* Contenedor Principal del Chat */
+        #chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 95vh;
+            border: 4px solid #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Ventana donde aparecen los mensajes */
+        #chat-window {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto; /* Permite hacer scroll cuando hay muchos mensajes */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Estilo base para cada mensaje */
+        .message {
+            max-width: 85%;
+            padding: 15px;
+            border: 3px solid #fff;
+            word-wrap: break-word; /* Para que las palabras largas no rompan el diseño */
+            line-height: 1.5;
+        }
+
+        /* Mensajes del usuario, alineados a la derecha */
+        .user-message {
+            align-self: flex-end;
+            background-color: #1a1a1a; /* Un fondo ligeramente diferente */
+        }
+
+        /* Mensajes del asistente (la IA), alineados a la izquierda */
+        .assistant-message {
+            align-self: flex-start;
+            background-color: #000;
+        }
+        
+        /* Indicador de "pensando..." */
+        .thinking-message {
+            align-self: flex-start;
+            border-style: dashed;
+        }
+
+        /* Formulario de entrada de texto */
+        #chat-form {
+            display: flex;
+            border-top: 4px solid #fff;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+        }
+
+        #message-input:focus {
+            outline: none;
+        }
+
+        #chat-form button {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-left: 4px solid #fff;
+            padding: 0 20px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        #chat-form button:hover {
+            background-color: #333;
+        }
     </style>
 </head>
 <body>
+
     <div id="chat-container">
-        <header class="chat-header">
-            <h1>Lindy AI Chat (con Memoria)</h1>
-            <div class="header-buttons">
-                <button id="clear-chat-btn" class="header-btn" title="Limpiar Chat y Memoria">🗑️</button>
-                <button id="theme-toggle-btn" class="header-btn" title="Cambiar Tema">🌙</button>
-                <button id="debug-toggle-btn" class="header-btn" title="Depuración">🐞</button>
-            </div>
-        </header>
-        <main id="message-container"></main>
-        <footer class="chat-input-area">
-            <form id="chat-form">
-                <input type="text" id="user-input" placeholder="Escribe tu mensaje..." autocomplete="off">
-                <button type="submit" id="send-btn" title="Enviar">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                </button>
-            </form>
-        </footer>
-    </div>
-    <div id="debug-panel" class="hidden">
-        <div class="debug-header"><h3>Panel de Depuración</h3><button id="close-debug-btn" class="header-btn">&times;</button></div>
-        <div id="debug-content"></div>
+        <div id="chat-window">
+            <!-- Los mensajes del chat aparecerán aquí -->
+            <div class="assistant-message">Hola, soy un personaje de Deltarune. ¿De qué quieres hablar?</div>
+        </div>
+        <form id="chat-form">
+            <input type="text" id="message-input" placeholder="Escribe tu mensaje aquí..." autocomplete="off">
+            <button type="submit">Enviar</button>
+        </form>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- CONFIGURACIÓN FINAL ---
-            const YOUR_SERVER_URL = 'https://lindy-chatbot-backend.vercel.app/api';
+        // --- CONFIGURACIÓN ---
+        const LINDY_API_URL = 'https://public.lindy.ai/api/v1/webhooks/lindy/2253ad7f-1eec-49f7-b272-6beac5475fa2';
+        // ¡¡IMPORTANTE!! Reemplaza esta llave con la NUEVA que generaste.
+        const LINDY_SECRET_KEY = '7effd4e9144ed65d89b0b8ab790af3cc437a523ee7881617e840bfb9614d420e';
 
-            // --- SELECTORES DOM ---
-            const chatForm = document.getElementById('chat-form');
-            const userInput = document.getElementById('user-input');
-            const messageContainer = document.getElementById('message-container');
-            const themeToggleBtn = document.getElementById('theme-toggle-btn');
-            const clearChatBtn = document.getElementById('clear-chat-btn');
-            const debugToggleBtn = document.getElementById('debug-toggle-btn');
-            const debugPanel = document.getElementById('debug-panel');
-            const closeDebugBtn = document.getElementById('close-debug-btn');
-            const debugContent = document.getElementById('debug-content');
+        // --- REFERENCIAS A ELEMENTOS DEL HTML ---
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const chatWindow = document.getElementById('chat-window');
 
-            // ✅ NUEVO: Variable para almacenar el ID de la conversación actual.
-            let currentConversationId = null;
+        // --- LA "MEMORIA" DEL CHAT ---
+        // Aquí guardaremos todo el historial de la conversación.
+        let chatHistory = [
+            // Podemos empezar con un mensaje del sistema para darle contexto inicial a la IA.
+            { role: 'assistant', content: 'Hola, soy un personaje de Deltarune. ¿De qué quieres hablar?' }
+        ];
 
-            // --- MANEJO DE EVENTOS ---
-            chatForm.addEventListener('submit', handleSendMessage);
-            themeToggleBtn.addEventListener('click', toggleTheme);
-            clearChatBtn.addEventListener('click', clearChat);
-            debugToggleBtn.addEventListener('click', () => debugPanel.classList.toggle('hidden'));
-            closeDebugBtn.addEventListener('click', () => debugPanel.classList.add('hidden'));
+        // --- EVENTO PRINCIPAL: CUANDO EL USUARIO ENVÍA UN MENSAJE ---
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evita que la página se recargue al enviar el formulario.
+
+            const userInput = messageInput.value.trim();
+            if (!userInput) return; // No hacer nada si el mensaje está vacío.
+
+            // 1. Mostrar el mensaje del usuario en la pantalla.
+            addMessageToWindow(userInput, 'user');
             
-            loadInitialState();
-
-            // --- FUNCIONES PRINCIPALES ---
-
-            async function handleSendMessage(event) {
-                event.preventDefault();
-                const messageText = userInput.value.trim();
-                if (!messageText) return;
-
-                addMessageToUI('user', messageText);
-                saveChatSession(); // Guardamos inmediatamente después de enviar
-                userInput.value = '';
-                showTypingIndicator();
-
-                try {
-                    // ✅ CAMBIO: Pasamos el ID de la conversación actual a la función fetch.
-                    const fullResponseObject = await fetchAIResponse(messageText, currentConversationId);
-                    
-                    removeTypingIndicator();
-
-                    // Extraemos el texto visible para el usuario de la respuesta.
-                    const responseText = extractTextFromResponse(fullResponseObject);
-                    addMessageToUI('bot', responseText);
-
-                    // ✅ CAMBIO: Actualizamos el ID de la conversación si la respuesta contiene uno.
-                    // Usamos el operador `||` para mantener el ID antiguo si no llega uno nuevo.
-                    currentConversationId = fullResponseObject.data?.conversationId || currentConversationId;
-                    
-                    saveChatSession(); // Guardamos de nuevo con la respuesta y el posible nuevo ID.
-                } catch (error) {
-                    removeTypingIndicator();
-                    const errorMessage = "Lo siento, hubo un error. Revisa el panel de depuración para más detalles.";
-                    addMessageToUI('bot', errorMessage, 'error');
-                    logToDebugPanel('Error en la Petición', error.toString());
-                }
-            }
+            // 2. Guardar el mensaje del usuario en nuestra "memoria".
+            chatHistory.push({ role: 'user', content: userInput });
             
-            /**
-             * ✅ CAMBIO: Ahora acepta el `conversationId` y lo incluye en la petición al servidor.
-             */
-            async function fetchAIResponse(message, conversationId) {
-                const requestId = Date.now().toString() + Math.random().toString(36).substring(2);
-                
-                const response = await fetch(YOUR_SERVER_URL, {
+            // 3. Limpiar el campo de texto.
+            messageInput.value = '';
+
+            // 4. Mostrar un indicador de "pensando..."
+            const thinkingIndicator = addMessageToWindow('...', 'thinking');
+
+            // 5. Llamar a la API de Lindy con el historial completo.
+            try {
+                const response = await fetch(LINDY_API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: message, 
-                        requestId: requestId, 
-                        conversationId: conversationId // Se envía el ID actual (puede ser null)
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${LINDY_SECRET_KEY}`
+                    },
+                    body: JSON.stringify({
+                        chat_history: chatHistory
                     })
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ response: 'Error de red o respuesta no válida del servidor.' }));
-                    throw new Error(errorData.response || `Error del servidor: ${response.status}`);
-                }
-                
-                // Devolvemos el objeto JSON completo para poder extraer el texto y el ID.
-                return await response.json();
-            }
-
-            /**
-             * ✅ NUEVO: Función para extraer el texto de la respuesta de forma segura.
-             */
-            function extractTextFromResponse(data) {
-                logToDebugPanel('Respuesta Completa (vía Servidor)', JSON.stringify(data, null, 2));
-
-                if (typeof data === 'string') return data;
-                if (data && data.response) return data.response;
-                if (data && data.text) return data.text;
-                if (data && data.message) return data.message;
-                if (data && data.content) return data.content;
-                // Si la respuesta es un objeto pero no tiene un campo de texto conocido, lo mostramos como JSON.
-                if (data) return JSON.stringify(data, null, 2);
-
-                return "No se recibió una respuesta legible del asistente.";
-            }
-
-            // --- FUNCIONES DE LA INTERFAZ Y ESTADO ---
-
-            function addMessageToUI(sender, text, type = 'normal') {
-                const messageDiv = document.createElement("div");
-                messageDiv.className = `message ${sender}-message`;
-                const bubble = document.createElement("div");
-                bubble.className = "bubble";
-                bubble.textContent = text;
-                if (type === 'error') bubble.style.color = 'red';
-                const timestamp = document.createElement("div");
-                timestamp.className = "timestamp";
-                timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                messageDiv.appendChild(bubble);
-                messageDiv.appendChild(timestamp);
-                messageContainer.appendChild(messageDiv);
-                scrollToBottom();
-            }
-
-            function showTypingIndicator() {
-                const indicatorDiv = document.createElement("div");
-                indicatorDiv.className = "message bot-message";
-                indicatorDiv.id = "typing-indicator";
-                indicatorDiv.innerHTML = `<div class="bubble typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
-                messageContainer.appendChild(indicatorDiv);
-                scrollToBottom();
-            }
-
-            function removeTypingIndicator() {
-                const indicator = document.getElementById("typing-indicator");
-                if (indicator) indicator.remove();
-            }
-
-            function scrollToBottom() {
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-            }
-
-            function toggleTheme() {
-                document.body.classList.toggle('dark-theme');
-                const isDark = document.body.classList.contains('dark-theme');
-                themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
-                localStorage.setItem('chat-theme', isDark ? 'dark' : 'light');
-            }
-
-            /**
-             * ✅ CAMBIO: Ahora también resetea la memoria de la conversación.
-             */
-            function clearChat() {
-                messageContainer.innerHTML = '';
-                currentConversationId = null; // Borramos la memoria
-                localStorage.removeItem('chat-session'); // Borramos la sesión guardada
-                addMessageToUI('bot', 'Hola, he olvidado nuestra conversación anterior. ¿En qué puedo ayudarte hoy?');
-            }
-
-            /**
-             * ✅ CAMBIO: Guarda tanto el historial como el ID de la conversación.
-             */
-            function saveChatSession() {
-                const sessionData = {
-                    history: messageContainer.innerHTML,
-                    conversationId: currentConversationId
-                };
-                localStorage.setItem('chat-session', JSON.stringify(sessionData));
-            }
-
-            /**
-             * ✅ CAMBIO: Carga la sesión completa, incluyendo el ID de la conversación.
-             */
-            function loadInitialState() {
-                // Cargar tema
-                const savedTheme = localStorage.getItem('chat-theme');
-                if (savedTheme === 'dark') {
-                    document.body.classList.add('dark-theme');
-                    themeToggleBtn.textContent = '☀️';
+                    throw new Error(`La API respondió con un error: ${response.status}`);
                 }
 
-                // Cargar sesión de chat
-                const savedSession = localStorage.getItem('chat-session');
-                if (savedSession) {
-                    const sessionData = JSON.parse(savedSession);
-                    messageContainer.innerHTML = sessionData.history;
-                    currentConversationId = sessionData.conversationId;
-                    scrollToBottom();
-                } else {
-                    addMessageToUI('bot', 'Hola, ¿en qué puedo ayudarte hoy?');
-                }
-            }
-            
-            function logToDebugPanel(title, content) {
-                const entry = document.createElement("div");
-                entry.innerHTML = `<strong>${title}:</strong><pre>${content}</pre>`;
-                debugContent.appendChild(entry);
-                debugContent.scrollTop = debugContent.scrollHeight;
+                const assistantResponse = await response.text();
+
+                // 6. Mostrar la respuesta de la IA en la pantalla.
+                addMessageToWindow(assistantResponse, 'assistant');
+
+                // 7. Guardar la respuesta de la IA en nuestra "memoria".
+                chatHistory.push({ role: 'assistant', content: assistantResponse });
+
+            } catch (error) {
+                console.error('Error al contactar a Lindy:', error);
+                addMessageToWindow('Oops... algo salió mal. Inténtalo de nuevo.', 'assistant');
+            } finally {
+                // 8. Quitar el indicador de "pensando..." sin importar si hubo éxito o error.
+                thinkingIndicator.remove();
             }
         });
+
+        // --- FUNCIÓN DE AYUDA PARA AÑADIR MENSAJES A LA VENTANA ---
+        function addMessageToWindow(text, role) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', `${role}-message`);
+            messageElement.textContent = text;
+            chatWindow.appendChild(messageElement);
+
+            // Hacer scroll hacia el final para ver el último mensaje.
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            
+            return messageElement; // Devolvemos el elemento por si necesitamos borrarlo (como el indicador).
+        }
     </script>
+
 </body>
 </html>
