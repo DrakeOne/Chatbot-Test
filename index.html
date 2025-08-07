@@ -70,7 +70,9 @@
         /* Indicador de "pensando..." */
         .thinking-message {
             align-self: flex-start;
+            color: #888;
             border-style: dashed;
+            border-color: #888;
         }
 
         /* Formulario de entrada de texto */
@@ -113,8 +115,7 @@
 
     <div id="chat-container">
         <div id="chat-window">
-            <!-- Los mensajes del chat aparecerán aquí -->
-            <div class="assistant-message">Hola, soy un personaje de Deltarune. ¿De qué quieres hablar?</div>
+            <div class="message assistant-message">Hola, soy un personaje de Deltarune. ¿De qué quieres hablar?</div>
         </div>
         <form id="chat-form">
             <input type="text" id="message-input" placeholder="Escribe tu mensaje aquí..." autocomplete="off">
@@ -123,43 +124,37 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
+        // --- CONFIGURACIÓN CON TUS DATOS DE PRUEBA ---
         const LINDY_API_URL = 'https://public.lindy.ai/api/v1/webhooks/lindy/2253ad7f-1eec-49f7-b272-6beac5475fa2';
-        // ¡¡IMPORTANTE!! Reemplaza esta llave con la NUEVA que generaste.
         const LINDY_SECRET_KEY = '7effd4e9144ed65d89b0b8ab790af3cc437a523ee7881617e840bfb9614d420e';
 
         // --- REFERENCIAS A ELEMENTOS DEL HTML ---
         const chatForm = document.getElementById('chat-form');
         const messageInput = document.getElementById('message-input');
         const chatWindow = document.getElementById('chat-window');
+        const sendButton = chatForm.querySelector('button');
 
         // --- LA "MEMORIA" DEL CHAT ---
-        // Aquí guardaremos todo el historial de la conversación.
         let chatHistory = [
-            // Podemos empezar con un mensaje del sistema para darle contexto inicial a la IA.
             { role: 'assistant', content: 'Hola, soy un personaje de Deltarune. ¿De qué quieres hablar?' }
         ];
 
         // --- EVENTO PRINCIPAL: CUANDO EL USUARIO ENVÍA UN MENSAJE ---
         chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita que la página se recargue al enviar el formulario.
+            e.preventDefault(); 
 
             const userInput = messageInput.value.trim();
-            if (!userInput) return; // No hacer nada si el mensaje está vacío.
+            if (!userInput) return; 
 
-            // 1. Mostrar el mensaje del usuario en la pantalla.
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+
             addMessageToWindow(userInput, 'user');
-            
-            // 2. Guardar el mensaje del usuario en nuestra "memoria".
             chatHistory.push({ role: 'user', content: userInput });
-            
-            // 3. Limpiar el campo de texto.
             messageInput.value = '';
 
-            // 4. Mostrar un indicador de "pensando..."
             const thinkingIndicator = addMessageToWindow('...', 'thinking');
 
-            // 5. Llamar a la API de Lindy con el historial completo.
             try {
                 const response = await fetch(LINDY_API_URL, {
                     method: 'POST',
@@ -167,29 +162,36 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${LINDY_SECRET_KEY}`
                     },
+                    // --- ¡¡AQUÍ ESTÁ EL ARREGLO!! ---
+                    // Añadimos el campo "callbackUrl" que Lindy nos exige,
+                    // aunque no lo vayamos a usar porque estamos en modo síncrono.
                     body: JSON.stringify({
-                        chat_history: chatHistory
+                        chat_history: chatHistory,
+                        callbackUrl: "https://example.com/placeholder"
                     })
                 });
 
+                thinkingIndicator.remove(); 
+
                 if (!response.ok) {
-                    throw new Error(`La API respondió con un error: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`Error de la API: ${response.status} - ${errorText}`);
                 }
 
                 const assistantResponse = await response.text();
-
-                // 6. Mostrar la respuesta de la IA en la pantalla.
                 addMessageToWindow(assistantResponse, 'assistant');
-
-                // 7. Guardar la respuesta de la IA en nuestra "memoria".
                 chatHistory.push({ role: 'assistant', content: assistantResponse });
 
             } catch (error) {
                 console.error('Error al contactar a Lindy:', error);
-                addMessageToWindow('Oops... algo salió mal. Inténtalo de nuevo.', 'assistant');
+                if (document.body.contains(thinkingIndicator)) { 
+                    thinkingIndicator.remove();
+                }
+                addMessageToWindow(`Oops... algo salió mal. Error: ${error.message}`, 'assistant');
             } finally {
-                // 8. Quitar el indicador de "pensando..." sin importar si hubo éxito o error.
-                thinkingIndicator.remove();
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.focus();
             }
         });
 
@@ -199,11 +201,8 @@
             messageElement.classList.add('message', `${role}-message`);
             messageElement.textContent = text;
             chatWindow.appendChild(messageElement);
-
-            // Hacer scroll hacia el final para ver el último mensaje.
             chatWindow.scrollTop = chatWindow.scrollHeight;
-            
-            return messageElement; // Devolvemos el elemento por si necesitamos borrarlo (como el indicador).
+            return messageElement;
         }
     </script>
 
